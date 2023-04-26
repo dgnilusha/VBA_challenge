@@ -1,0 +1,153 @@
+Sub TickerData()
+
+    ' combine work sheet
+    For Each ws In Worksheets
+    
+    'Define variables
+    Dim totalVolume As Double
+    Dim summaryTableRow As Integer
+    Dim yearlyChange As Double
+    Dim PercentChange As Double
+    Dim YearlyClose As Double
+    Dim Ticker As String
+    Dim maxPercentIncrease As Double
+    Dim maxTicker As String
+    Dim maxPercentDecrease As Double
+    Dim maxVolume As Double
+    maxPercentDecrease = 1E+20 'a very large positive value
+    maxVolume = 0 'a very low value
+
+    
+    'Initialize variables
+    totalVolume = 0
+    summaryTableRow = 2
+    YearlyOpen = 0
+    Start = 2
+    maxPercentIncrease = 0
+    
+    
+    'Set tittle
+    ws.Range("I1").Value = "Ticker"
+    ws.Range("J1").Value = "Yearly Change"
+    ws.Range("K1").Value = "Percent Change"
+    ws.Range("L1").Value = "Total Stock Volume"
+    ws.Range("N3").Value = "Greatest%increase"
+    ws.Range("N4").Value = "Greatest%Decrease"
+    ws.Range("N5").Value = "Greatest Total Volume"
+    ws.Range("O2").Value = "Ticker"
+    ws.Range("P2").Value = "Value"
+    
+      
+    ' Get total number of rows
+    LastRow = Cells(Rows.Count, "A").End(xlUp).Row
+    
+        '  yearlyOpen = Cells(2 , 3).Value
+   
+       
+    ' Loop over the data in the sheet
+    For i = 2 To LastRow
+    
+        ' Check if the ticker changes
+        If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+        
+            ' Get ticker symbol
+            Ticker = Cells(i, 1).Value
+        
+            ' Adding the final volume to the total
+            totalVolume = totalVolume + Cells(i, 7).Value
+            
+            'Calculate change
+            YearlyOpen = Cells(Start, 3).Value
+            YearlyClose = ws.Cells(i, 6).Value
+            yearlyChange = YearlyClose - YearlyOpen
+            
+            If YearlyOpen <> 0 Then
+            PercentChange = yearlyChange / YearlyOpen
+            ws.Range("K" & 2 + j).NumberFormat = "0.00%"
+            
+            
+            End If
+
+            
+             'Apply color formatting to the Yearly Change column
+             
+        If yearlyChange < 0 Then
+            ws.Cells(summaryTableRow, 10).Interior.ColorIndex = 3 'Red color
+        ElseIf yearlyChange > 0 Then
+            ws.Cells(summaryTableRow, 10).Interior.ColorIndex = 4 'Green color
+        Else
+            ws.Cells(summaryTableRow, 10).Interior.ColorIndex = 0 'No color
+        End If
+                 
+                
+        
+          'Find max percent increase
+            If PercentChange > maxPercentIncrease Then
+                maxPercentIncrease = PercentChange
+                maxTicker = Ticker
+            End If
+            
+              'Output greatest percent increase
+            ws.Range("O3").Value = maxTicker
+            ws.Range("P3").Value = maxPercentIncrease
+          
+              'Calculate percent decrease
+        If YearlyOpen <> 0 Then
+            PercentChange = yearlyChange / YearlyOpen
+        If PercentChange < 0 And PercentChange < maxPercentDecrease Then
+            maxPercentDecrease = PercentChange
+            ws.Range("O4").Value = Ticker
+         ws.Range("P4").Value = PercentChange
+        End If
+        
+        'Find max volume
+     If totalVolume > maxVolume Then
+       maxVolume = totalVolume
+       ws.Range("O5").Value = Ticker
+      ws.Range("P5").Value = maxVolume
+     End If
+
+   
+     End If
+            
+            Start = i + 1
+               
+                                
+            'Output to summary table
+         ws.Cells(summaryTableRow, 9).Value = Ticker
+         ws.Cells(summaryTableRow, 12).Value = totalVolume
+         ws.Cells(summaryTableRow, 10).Value = yearlyChange
+         ws.Cells(summaryTableRow, 11).Value = PercentChange
+               
+         
+            'Reset variables
+            summaryTableRow = summaryTableRow + 1
+            totalVolume = 0
+            yearlyChange = 0
+            PercentChange = 0
+            YearlyOpen = 0
+            
+                  
+            
+        ' If ticker doesn't change, do this
+        Else
+            ' Summing the volume
+            totalVolume = totalVolume + ws.Cells(i, 7).Value
+          
+
+        End If
+     
+    
+
+    Next i
+    
+ 
+    
+    Next ws
+    
+End Sub
+
+
+
+
+
